@@ -14,7 +14,210 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      care_events: {
+        Row: {
+          id: string
+          kind: string
+          note: string | null
+          occurred_at: string
+          plant_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          kind?: string
+          note?: string | null
+          occurred_at?: string
+          plant_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          note?: string | null
+          occurred_at?: string
+          plant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_events_plant_id_fkey"
+            columns: ["plant_id"]
+            isOneToOne: false
+            referencedRelation: "garden_plants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnoses: {
+        Row: {
+          care_tips: Json
+          confidence: number
+          created_at: string
+          health_status: string
+          id: string
+          image_url: string
+          issues: Json
+          plant_id: string | null
+          plant_name: string
+          scientific_name: string | null
+          summary: string
+          user_id: string
+          watering_interval_days: number | null
+        }
+        Insert: {
+          care_tips?: Json
+          confidence: number
+          created_at?: string
+          health_status: string
+          id?: string
+          image_url: string
+          issues?: Json
+          plant_id?: string | null
+          plant_name: string
+          scientific_name?: string | null
+          summary: string
+          user_id: string
+          watering_interval_days?: number | null
+        }
+        Update: {
+          care_tips?: Json
+          confidence?: number
+          created_at?: string
+          health_status?: string
+          id?: string
+          image_url?: string
+          issues?: Json
+          plant_id?: string | null
+          plant_name?: string
+          scientific_name?: string | null
+          summary?: string
+          user_id?: string
+          watering_interval_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnoses_plant_id_fkey"
+            columns: ["plant_id"]
+            isOneToOne: false
+            referencedRelation: "garden_plants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      garden_plants: {
+        Row: {
+          acquired_at: string | null
+          created_at: string
+          fertilizing_interval_days: number | null
+          id: string
+          image_url: string | null
+          last_fertilized_at: string | null
+          last_watered_at: string | null
+          nickname: string
+          notes: string | null
+          profile_id: string | null
+          species: string
+          user_id: string
+          watering_interval_days: number
+        }
+        Insert: {
+          acquired_at?: string | null
+          created_at?: string
+          fertilizing_interval_days?: number | null
+          id?: string
+          image_url?: string | null
+          last_fertilized_at?: string | null
+          last_watered_at?: string | null
+          nickname: string
+          notes?: string | null
+          profile_id?: string | null
+          species: string
+          user_id: string
+          watering_interval_days?: number
+        }
+        Update: {
+          acquired_at?: string | null
+          created_at?: string
+          fertilizing_interval_days?: number | null
+          id?: string
+          image_url?: string | null
+          last_fertilized_at?: string | null
+          last_watered_at?: string | null
+          nickname?: string
+          notes?: string | null
+          profile_id?: string | null
+          species?: string
+          user_id?: string
+          watering_interval_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "garden_plants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "plant_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plant_profiles: {
+        Row: {
+          botanical_name: string | null
+          care_tips: Json
+          category: string
+          created_at: string
+          description: string
+          difficulty: string
+          emoji: string
+          humidity: string | null
+          id: string
+          light: string
+          name: string
+          slug: string
+          sort_order: number
+          temperature: string | null
+          water: string
+          watering_interval_days: number
+        }
+        Insert: {
+          botanical_name?: string | null
+          care_tips?: Json
+          category?: string
+          created_at?: string
+          description: string
+          difficulty?: string
+          emoji?: string
+          humidity?: string | null
+          id?: string
+          light: string
+          name: string
+          slug: string
+          sort_order?: number
+          temperature?: string | null
+          water: string
+          watering_interval_days?: number
+        }
+        Update: {
+          botanical_name?: string | null
+          care_tips?: Json
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          emoji?: string
+          humidity?: string | null
+          id?: string
+          light?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          temperature?: string | null
+          water?: string
+          watering_interval_days?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
