@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { diagnosePlant } from "@/lib/diagnose.functions";
 import { fileToResizedDataUrl, formatDate, healthStyles, severityStyles } from "@/lib/plants";
-import { diagnosesQuery, gardenPlantsQuery } from "@/lib/plant-queries";
+import { diagnosesQuery, gardenPlantsQuery, type Diagnosis } from "@/lib/plant-queries";
 
 export const Route = createFileRoute("/_authenticated/diagnose")({
   loader: ({ context }) =>
@@ -31,8 +31,9 @@ export const Route = createFileRoute("/_authenticated/diagnose")({
   component: DiagnosePage,
 });
 
-type Diagnosis = NonNullable<Awaited<ReturnType<typeof getDiagnosis>>>;
-declare function getDiagnosis(): Promise<{ diagnosis: Diagnosis }>;
+const HEALTH_FALLBACK = { label: "Checking", className: "bg-muted text-muted-foreground" };
+const SEVERITY_FALLBACK = { label: "Note", className: "bg-muted text-muted-foreground" };
+type DiagnosisIssue = { name: string; severity: string; description: string; treatment: string };
 
 function DiagnosePage() {
   const navigate = useNavigate();
@@ -200,7 +201,7 @@ function DiagnosePage() {
               <p className="mt-1 text-sm text-muted-foreground">Identifying species, checking leaves & soil</p>
             </div>
           ) : result ? (
-            <DiagnosisResult diagnosis={result} onAddToGarden={() => addToGarden(result)} />
+            <DiagnosisResult diagnosis={result} onAddToGarden={() => addToGarden(result)} onClear={() => setResult(null)} />
           ) : (
             <div className="flex min-h-72 flex-col items-center justify-center text-center">
               <span className="text-4xl">🪴</span>
@@ -219,7 +220,7 @@ function DiagnosePage() {
           <h2 className="text-2xl text-sienna-deep">Recent diagnoses</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {recent.map((d) => {
-              const style = healthStyles[d.health_status] ?? healthStyles.needs_attention;
+              const style = healthStyles[d.health_status] ?? healthStyles['needs_attention'] ?? HEALTH_FALLBACK;
               return (
                 <button
                   key={d.id}
@@ -269,10 +270,18 @@ async function supabaseInsert(input: {
   }
 }
 
-function DiagnosisResult({ diagnosis, onAddToGarden }: { diagnosis: Diagnosis; onAddToGarden: () => void }) {
-  const style = healthStyles[diagnosis.health_status] ?? healthStyles.needs_attention;
-  const issues = Array.isArray(diagnosis.issues) ? diagnosis.issues : [];
-  const tips = Array.isArray(diagnosis.care_tips) ? diagnosis.care_tips : [];
+function DiagnosisResult({
+  diagnosis,
+  onAddToGarden,
+  onClear,
+}: {
+  diagnosis: Diagnosis;
+  onAddToGarden: () => void;
+  onClear: () => void;
+}) {
+  const style = healthStyles[diagnosis.health_status] ?? healthStyles['needs_attention'] ?? HEALTH_FALLBACK;
+  const issues = (Array.isArray(diagnosis.issues) ? diagnosis.issues : []) as DiagnosisIssue[];
+  const tips = (Array.isArray(diagnosis.care_tips) ? diagnosis.care_tips : []) as string[];
 
   return (
     <div>
@@ -292,7 +301,7 @@ function DiagnosisResult({ diagnosis, onAddToGarden }: { diagnosis: Diagnosis; o
         <div className="mt-5 space-y-3">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-copper">Issues found</h3>
           {issues.map((issue, i) => {
-            const severity = severityStyles[issue.severity] ?? severityStyles.moderate;
+            const severity = severityStyles[issue.severity] ?? severityStyles['moderate'] ?? SEVERITY_FALLBACK;
             return (
               <div key={i} className="rounded-xl border border-border bg-muted/40 p-3">
                 <div className="flex items-center justify-between gap-2">
@@ -338,7 +347,7 @@ function DiagnosisResult({ diagnosis, onAddToGarden }: { diagnosis: Diagnosis; o
         <button type="button" onClick={onAddToGarden} className="btn-copper text-sm">
           ➕ Add to my garden
         </button>
-        <button type="button" onClick={() => setResult(null)} className="btn-ghost text-sm">
+        <button type="button" onClick={onClear} className="btn-ghost text-sm">
           Clear result
         </button>
       </div>
