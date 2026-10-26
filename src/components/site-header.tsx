@@ -38,7 +38,7 @@ export function SiteHeader() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    router.navigate({ to: "/auth", replace: true });
+    router.navigate({ to: "/auth", search: { redirect: undefined }, replace: true });
   };
 
   return (
@@ -82,7 +82,7 @@ export function SiteHeader() {
               </button>
             </>
           ) : (
-            <Link to="/auth" className="btn-primary px-4 py-1.5 text-sm">
+            <Link to="/auth" search={{ redirect: undefined }} className="btn-primary px-4 py-1.5 text-sm">
               Sign in
             </Link>
           )}

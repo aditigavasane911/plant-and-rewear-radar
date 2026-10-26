@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { gardenPlantsQuery, plantProfilesQuery, type GardenPlantWithEvents } from "@/lib/plant-queries";
+import { gardenPlantsQuery, plantProfilesQuery, type GardenPlantWithEvents, type PlantProfile } from "@/lib/plant-queries";
 import { formatDate, formatDateTime, wateringStateStyles, wateringStatus } from "@/lib/plants";
 
 export const Route = createFileRoute("/_authenticated/garden")({
@@ -249,7 +249,7 @@ function AddPlantForm({
   profiles,
   onDone,
 }: {
-  profiles: Awaited<ReturnType<typeof useSuspenseQuery<ReturnType<typeof plantProfilesQuery>>>["data"]>;
+  profiles: PlantProfile[];
   onDone: () => void;
 }) {
   const [nickname, setNickname] = useState("");
