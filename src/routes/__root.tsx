@@ -109,11 +109,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-            PlantCare AI — grown with care, one plant at a time.
-          </footer>
+          {children}
         </div>
         <Scripts />
       </body>
@@ -126,8 +122,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <SiteHeader />
+      <main className="flex-1">
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </main>
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+        PlantCare AI — grown with care, one plant at a time.
+      </footer>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
