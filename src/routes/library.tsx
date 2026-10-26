@@ -135,12 +135,12 @@ function LibraryPage() {
                 </div>
               ) : null}
             </dl>
-            {p.care_tips.length > 0 ? (
+            {Array.isArray(p.care_tips) && p.care_tips.length > 0 ? (
               <details className="mt-4 border-t border-border pt-3">
                 <summary className="cursor-pointer text-sm font-medium text-primary">Pro tips</summary>
                 <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground">
                   {p.care_tips.map((tip, i) => (
-                    <li key={i}>{tip}</li>
+                    <li key={i}>{String(tip)}</li>
                   ))}
                 </ul>
               </details>

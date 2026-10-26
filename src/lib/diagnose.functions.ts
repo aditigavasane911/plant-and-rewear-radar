@@ -60,7 +60,7 @@ export const diagnosePlant = createServerFn({ method: "POST" })
     const notes = (data.notes ?? "").trim();
     const plantId = data.plantId ?? null;
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env['LOVABLE_API_KEY'];
     if (!apiKey) {
       throw new Error("AI is not configured for this app yet.");
     }
@@ -73,9 +73,14 @@ export const diagnosePlant = createServerFn({ method: "POST" })
       fetch: runIdFetch.fetch,
     });
 
+    // @ai-sdk/openai and @ai-sdk/gateway bundle different copies of @ai-sdk/provider with
+    // identical runtime contracts, so bridge the version skew with a cast.
+    const streamTextModel = provider.responses(MODEL_ID) as unknown as Parameters<
+      typeof wrapLanguageModel
+    >[0]["model"];
     const result = streamText({
       model: wrapLanguageModel({
-        model: provider.responses(MODEL_ID),
+        model: streamTextModel,
         middleware: extractJsonMiddleware(),
       }),
       system: SYSTEM_PROMPT,
