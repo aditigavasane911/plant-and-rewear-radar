@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DataScienceRouteImport } from './routes/data-science'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as AuthenticatedDiagnoseRouteImport } from './routes/_authenticated/diagnose'
 import { Route as AuthenticatedGardenRouteImport } from './routes/_authenticated/garden'
@@ -28,6 +29,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataScienceRoute = DataScienceRouteImport.update({
+  id: '/data-science',
+  path: '/data-science',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryRoute = LibraryRouteImport.update({
@@ -49,6 +55,7 @@ const AuthenticatedGardenRoute = AuthenticatedGardenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/data-science': typeof DataScienceRoute
   '/library': typeof LibraryRoute
   '/diagnose': typeof AuthenticatedDiagnoseRoute
   '/garden': typeof AuthenticatedGardenRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/data-science': typeof DataScienceRoute
   '/library': typeof LibraryRoute
   '/diagnose': typeof AuthenticatedDiagnoseRoute
   '/garden': typeof AuthenticatedGardenRoute
@@ -65,20 +73,23 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/data-science': typeof DataScienceRoute
   '/library': typeof LibraryRoute
   '/_authenticated/diagnose': typeof AuthenticatedDiagnoseRoute
   '/_authenticated/garden': typeof AuthenticatedGardenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/library' | '/diagnose' | '/garden'
+  fullPaths:
+    '/' | '/auth' | '/data-science' | '/library' | '/diagnose' | '/garden'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/library' | '/diagnose' | '/garden'
+  to: '/' | '/auth' | '/data-science' | '/library' | '/diagnose' | '/garden'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/data-science'
     | '/library'
     | '/_authenticated/diagnose'
     | '/_authenticated/garden'
@@ -88,6 +99,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DataScienceRoute: typeof DataScienceRoute
   LibraryRoute: typeof LibraryRoute
 }
 
@@ -112,6 +124,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-science': {
+      id: '/data-science'
+      path: '/data-science'
+      fullPath: '/data-science'
+      preLoaderRoute: typeof DataScienceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library': {
@@ -155,6 +174,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DataScienceRoute: DataScienceRoute,
   LibraryRoute: LibraryRoute,
 }
 export const routeTree = rootRouteImport

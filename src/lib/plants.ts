@@ -12,7 +12,10 @@ export function wateringStatus(
   next.setDate(next.getDate() + interval);
   const diffDays = Math.ceil((next.getTime() - Date.now()) / 86_400_000);
   if (diffDays < 0) {
-    return { state: "overdue", label: `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? "" : "s"}` };
+    return {
+      state: "overdue",
+      label: `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? "" : "s"}`,
+    };
   }
   if (diffDays === 0) {
     return { state: "due", label: "Water today" };
@@ -59,7 +62,11 @@ export function formatDateTime(iso: string): string {
  * Downscale an image file in the browser to keep AI payloads small,
  * returning a JPEG data URL.
  */
-export async function fileToResizedDataUrl(file: File, maxSize = 1280, quality = 0.82): Promise<string> {
+export async function fileToResizedDataUrl(
+  file: File,
+  maxSize = 1280,
+  quality = 0.82,
+): Promise<string> {
   const bitmap = await createImageBitmap(file);
   try {
     const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));

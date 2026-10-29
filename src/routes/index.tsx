@@ -16,7 +16,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "PlantCare AI — Diagnose, water & grow happy plants" },
       {
         property: "og:description",
-        content: "AI plant diagnosis, personalized care plans and a garden tracker in one warm, earthy app.",
+        content:
+          "AI plant diagnosis, personalized care plans and a garden tracker in one warm, earthy app.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -41,15 +42,33 @@ const features = [
   {
     emoji: "📖",
     title: "Plant library",
-    text: "Browse the needs of popular houseplants: light, water, humidity and pro tips, all in one place.",
+    text: "Browse verified taxonomy, light PPFD, target VPD and ASPCA toxicology across popular houseplants.",
     to: "/library",
+  },
+  {
+    emoji: "📊",
+    title: "Data science & biophysics",
+    text: "Simulate soil moisture decay curves, psychrometric VPD, and examine 54k-sample ML diagnostic benchmarks.",
+    to: "/data-science",
   },
 ];
 
 const steps = [
-  { n: "1", title: "Snap a photo", text: "Take or upload a picture of the leaf, stem or soil you're worried about." },
-  { n: "2", title: "Get the diagnosis", text: "Our AI identifies the plant, spots issues and explains what to do next." },
-  { n: "3", title: "Add it to your garden", text: "Save the plant, follow the care plan and keep it thriving over time." },
+  {
+    n: "1",
+    title: "Snap a photo",
+    text: "Take or upload a picture of the leaf, stem or soil you're worried about.",
+  },
+  {
+    n: "2",
+    title: "Get the diagnosis",
+    text: "Our AI identifies the plant, spots issues and explains what to do next.",
+  },
+  {
+    n: "3",
+    title: "Add it to your garden",
+    text: "Save the plant, follow the care plan and keep it thriving over time.",
+  },
 ];
 
 function Index() {
@@ -57,51 +76,68 @@ function Index() {
   const preview = profiles.slice(0, 6);
 
   return (
-    <div>
+    <div className="relative overflow-hidden">
+      {/* Subtle ambient palette glows */}
+      <div className="pointer-events-none absolute -top-24 -left-20 size-96 rounded-full bg-[#6EC6CA]/15 blur-3xl" />
+      <div className="pointer-events-none absolute top-16 right-0 size-96 rounded-full bg-[#CCABD8]/20 blur-3xl" />
+
       {/* Hero */}
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:py-16">
+      <section className="relative mx-auto grid max-w-[1480px] items-center gap-12 px-4 py-12 sm:px-8 lg:grid-cols-2 lg:px-12 lg:py-20">
         <div>
-          <p className="eyebrow">Your pocket botanist</p>
-          <h1 className="mt-3 text-4xl leading-tight text-sienna-deep sm:text-5xl">
-            Know your plants, <span className="italic text-primary">nurture</span> them better.
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="eyebrow">Your pocket botanist & data science hub</p>
+            <span className="rounded-full bg-[#6EC6CA]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#055B5C]">
+              Real Agronomic Data
+            </span>
+          </div>
+          <h1 className="mt-3 text-4xl leading-tight text-sienna-deep sm:text-5xl lg:text-6xl">
+            Know your plants,{" "}
+            <span className="italic bg-gradient-to-r from-[#8474A1] via-[#08979D] to-[#6EC6CA] bg-clip-text text-transparent font-normal">
+              nurture
+            </span>{" "}
+            them better.
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
-            PlantCare AI turns a single photo into a full diagnosis — what's ailing your plant, how to treat it,
-            and exactly when to water next. All your green companions, tracked in one warm little garden.
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            PlantCare AI turns a single photo into a full diagnosis — backed by authentic plant
+            physiology, photobiological PPFD thresholds, vapor pressure deficit dynamics, and a
+            quantitative garden tracker.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link to="/diagnose" className="btn-primary px-6 py-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link to="/diagnose" className="btn-primary px-7 py-3.5 text-base">
               🔬 Diagnose a plant
             </Link>
-            <Link to="/library" className="btn-outline px-6 py-3">
-              Explore the library
+            <Link to="/data-science" className="btn-copper px-6 py-3.5 text-base">
+              📊 Data Science Hub
+            </Link>
+            <Link to="/library" className="btn-outline px-6 py-3.5 text-base">
+              Explore library
             </Link>
           </div>
         </div>
-        <div className="overflow-hidden rounded-3xl border border-border shadow-[0_18px_50px_-24px_color-mix(in_oklab,var(--sienna-deep)_45%,transparent)]">
+        <div className="overflow-hidden rounded-3xl border border-border/80 shadow-[0_20px_50px_-20px_rgba(8,151,157,0.25)]">
           <img
             src={heroImage}
-            alt="Hand-painted houseplants on a wooden shelf in terracotta pots"
+            alt="Houseplants in glazed teal, lilac and amethyst ceramic pots on a modern shelf"
             width={1280}
             height={1024}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.01]"
           />
         </div>
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
-        <div className="grid gap-5 sm:grid-cols-3">
+      <section className="mx-auto max-w-[1480px] px-4 pb-8 sm:px-8 lg:px-12">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
             <Link
               key={f.title}
               to={f.to}
-              className="card-surface group p-6 transition-shadow hover:shadow-[0_14px_40px_-20px_color-mix(in_oklab,var(--primary)_40%,transparent)]"
+              className="card-surface group p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_16px_40px_-20px_rgba(8,151,157,0.22)]"
             >
-              <span className="text-3xl">{f.emoji}</span>
-              <h3 className="mt-3 text-xl text-sienna-deep">{f.title}</h3>
+              <span className="text-4xl">{f.emoji}</span>
+              <h3 className="mt-4 text-xl text-sienna-deep font-semibold">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
-              <span className="mt-4 inline-block text-sm font-medium text-primary transition-transform group-hover:translate-x-0.5">
+              <span className="mt-5 inline-block text-sm font-medium text-primary transition-transform group-hover:translate-x-1">
                 Open →
               </span>
             </Link>
@@ -110,51 +146,60 @@ function Index() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <section className="mx-auto max-w-[1480px] px-4 py-16 sm:px-8 lg:px-12">
         <p className="eyebrow">How it works</p>
-        <h2 className="mt-2 text-3xl text-sienna-deep">From leaf to thriving in three steps</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-3">
+        <h2 className="mt-2 text-3xl text-sienna-deep sm:text-4xl">
+          From leaf to thriving in three steps
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {steps.map((s) => (
-            <div key={s.n} className="card-surface p-6">
-              <span className="grid size-10 place-items-center rounded-full bg-primary font-display text-lg text-primary-foreground">
+            <div
+              key={s.n}
+              className="card-surface p-7 transition-all duration-300 hover:border-primary/30 hover:shadow-sm"
+            >
+              <span className="grid size-12 place-items-center rounded-full bg-gradient-to-br from-[#08979D] to-[#055B5C] font-display text-xl text-white shadow-sm">
                 {s.n}
               </span>
-              <h3 className="mt-4 text-lg text-sienna-deep">{s.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{s.text}</p>
+              <h3 className="mt-5 text-xl text-sienna-deep font-semibold">{s.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.text}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Library preview */}
-      <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+      <section className="mx-auto max-w-[1480px] px-4 pb-16 sm:px-8 lg:px-12">
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="eyebrow">Plant library</p>
-            <h2 className="mt-2 text-3xl text-sienna-deep">Meet some favourites</h2>
+            <h2 className="mt-2 text-3xl text-sienna-deep sm:text-4xl">Meet some favourites</h2>
           </div>
-          <Link to="/library" className="btn-outline hidden px-4 py-2 text-sm sm:inline-flex">
+          <Link to="/library" className="btn-outline hidden px-5 py-2.5 text-sm sm:inline-flex">
             View all {profiles.length} plants
           </Link>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
           {preview.map((p) => (
-            <Link key={p.id} to="/library" className="card-surface p-4 text-center transition-colors hover:bg-accent">
-              <span className="text-3xl">{p.emoji}</span>
-              <h3 className="mt-2 text-sm font-semibold text-sienna-deep">{p.name}</h3>
-              <p className="mt-0.5 text-xs capitalize text-muted-foreground">{p.difficulty}</p>
+            <Link
+              key={p.id}
+              to="/library"
+              className="card-surface p-5 text-center transition-all duration-200 hover:scale-[1.02] hover:border-primary/40 hover:bg-accent/60 hover:shadow-sm"
+            >
+              <span className="text-4xl">{p.emoji}</span>
+              <h3 className="mt-3 text-base font-semibold text-sienna-deep">{p.name}</h3>
+              <p className="mt-1 text-xs capitalize text-muted-foreground">{p.difficulty}</p>
             </Link>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="border-y border-border bg-secondary/60">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-12 text-center sm:px-6">
-          <h2 className="max-w-xl text-3xl text-sienna-deep">
+      <section className="border-y border-border bg-gradient-to-b from-secondary/40 via-secondary/70 to-secondary/40">
+        <div className="mx-auto flex max-w-[1480px] flex-col items-center gap-5 px-4 py-16 text-center sm:px-8 lg:px-12">
+          <h2 className="max-w-2xl text-3xl text-sienna-deep sm:text-4xl">
             Your plants are talking. PlantCare AI helps you listen.
           </h2>
-          <Link to="/diagnose" className="btn-copper px-6 py-3">
+          <Link to="/diagnose" className="btn-copper px-7 py-3.5 text-base">
             Get your first diagnosis — it takes a minute
           </Link>
         </div>

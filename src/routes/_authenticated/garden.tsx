@@ -1,25 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { gardenPlantsQuery, plantProfilesQuery, type GardenPlantWithEvents, type PlantProfile } from "@/lib/plant-queries";
+import {
+  gardenPlantsQuery,
+  plantProfilesQuery,
+  type GardenPlantWithEvents,
+  type PlantProfile,
+} from "@/lib/plant-queries";
 import { formatDate, formatDateTime, wateringStateStyles, wateringStatus } from "@/lib/plants";
+import { getBotanicalProfile } from "@/lib/botanical-data";
 
 export const Route = createFileRoute("/_authenticated/garden")({
-  loader: ({ context }) => Promise.all([
-    context.queryClient.ensureQueryData(gardenPlantsQuery()),
-    context.queryClient.ensureQueryData(plantProfilesQuery()),
-  ]),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(gardenPlantsQuery()),
+      context.queryClient.ensureQueryData(plantProfilesQuery()),
+    ]),
   head: () => ({
     meta: [
       { title: "My Garden — PlantCare AI" },
       {
         name: "description",
-        content: "Track every plant you own: watering rhythm, care history and the latest AI diagnoses.",
+        content:
+          "Track every plant you own: watering rhythm, care history and the latest AI diagnoses.",
       },
       { property: "og:title", content: "My Garden — PlantCare AI" },
-      { property: "og:description", content: "Track every plant: watering rhythm, care history and AI diagnoses." },
+      {
+        property: "og:description",
+        content: "Track every plant: watering rhythm, care history and AI diagnoses.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -45,7 +56,9 @@ function GardenPage() {
       if (!user) throw new Error("Please sign in first.");
       const now = new Date().toISOString();
       const [eventRes, updateRes] = await Promise.all([
-        supabase.from("care_events").insert({ plant_id: plant.id, user_id: user.id, kind: "watering" }),
+        supabase
+          .from("care_events")
+          .insert({ plant_id: plant.id, user_id: user.id, kind: "watering" }),
         supabase.from("garden_plants").update({ last_watered_at: now }).eq("id", plant.id),
       ]);
       if (eventRes.error) throw new Error(eventRes.error.message);
@@ -55,7 +68,8 @@ function GardenPage() {
       toast.success("Watered 💧");
       invalidate();
     },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Something went wrong."),
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Something went wrong."),
   });
 
   const fertilizeMutation = useMutation({
@@ -66,7 +80,9 @@ function GardenPage() {
       if (!user) throw new Error("Please sign in first.");
       const now = new Date().toISOString();
       const [eventRes, updateRes] = await Promise.all([
-        supabase.from("care_events").insert({ plant_id: plant.id, user_id: user.id, kind: "fertilizing" }),
+        supabase
+          .from("care_events")
+          .insert({ plant_id: plant.id, user_id: user.id, kind: "fertilizing" }),
         supabase.from("garden_plants").update({ last_fertilized_at: now }).eq("id", plant.id),
       ]);
       if (eventRes.error) throw new Error(eventRes.error.message);
@@ -76,7 +92,8 @@ function GardenPage() {
       toast.success("Fertilized 🌱");
       invalidate();
     },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Something went wrong."),
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Something went wrong."),
   });
 
   const deleteMutation = useMutation({
@@ -88,7 +105,8 @@ function GardenPage() {
       toast.success("Plant removed");
       invalidate();
     },
-    onError: (error) => toast.error(error instanceof Error ? error.message : "Something went wrong."),
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Something went wrong."),
   });
 
   const summary = plants.reduce(
@@ -101,7 +119,7 @@ function GardenPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-[1480px] px-4 py-10 sm:px-8 lg:px-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">Garden tracker</p>
@@ -157,7 +175,11 @@ function GardenPage() {
               <article key={plant.id} className="card-surface flex flex-col p-5">
                 <div className="flex items-start gap-3">
                   {plant.image_url ? (
-                    <img src={plant.image_url} alt={plant.nickname} className="size-14 rounded-xl object-cover" />
+                    <img
+                      src={plant.image_url}
+                      alt={plant.nickname}
+                      className="size-14 rounded-xl object-cover"
+                    />
                   ) : (
                     <span className="grid size-14 shrink-0 place-items-center rounded-xl bg-secondary text-2xl">
                       🌿
@@ -170,7 +192,11 @@ function GardenPage() {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                  <span className={"rounded-full px-2.5 py-1 font-semibold " + wateringStateStyles[status.state]}>
+                  <span
+                    className={
+                      "rounded-full px-2.5 py-1 font-semibold " + wateringStateStyles[status.state]
+                    }
+                  >
                     💧 {status.label}
                   </span>
                   {plant.last_fertilized_at ? (
@@ -180,7 +206,53 @@ function GardenPage() {
                   ) : null}
                 </div>
 
-                {plant.notes ? <p className="mt-3 text-sm text-muted-foreground">{plant.notes}</p> : null}
+                {plant.notes ? (
+                  <p className="mt-3 text-sm text-muted-foreground">{plant.notes}</p>
+                ) : null}
+
+                {(() => {
+                  const botanical = getBotanicalProfile(plant.species);
+                  if (!botanical) return null;
+                  return (
+                    <div className="mt-3 rounded-xl border border-palette-aqua/30 bg-palette-aqua/10 p-2.5 text-xs">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-palette-pine">
+                        <span className="flex items-center gap-1">📋 Quick Care Guide</span>
+                        <Link
+                          to="/data-science"
+                          className="font-mono text-palette-teal hover:underline text-[10px]"
+                        >
+                          Simulate →
+                        </Link>
+                      </div>
+                      <div className="mt-1.5 grid grid-cols-3 gap-1.5 text-[10px]">
+                        <div className="rounded-lg bg-background/90 p-1.5 text-center border border-border/50">
+                          <p className="text-[9px] uppercase font-bold text-muted-foreground">
+                            ☀️ Sun
+                          </p>
+                          <p className="font-semibold text-foreground truncate mt-0.5">
+                            {botanical.lux_range}
+                          </p>
+                        </div>
+                        <div className="rounded-lg bg-background/90 p-1.5 text-center border border-border/50">
+                          <p className="text-[9px] uppercase font-bold text-muted-foreground">
+                            💨 Air
+                          </p>
+                          <p className="font-semibold text-[#08979D] mt-0.5">
+                            {botanical.vpd_optimal_kpa} kPa
+                          </p>
+                        </div>
+                        <div className="rounded-lg bg-background/90 p-1.5 text-center border border-border/50">
+                          <p className="text-[9px] uppercase font-bold text-muted-foreground">
+                            🪴 Soil
+                          </p>
+                          <p className="font-semibold text-foreground mt-0.5">
+                            pH {botanical.soil_ph_min}–{botanical.soil_ph_max}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="mt-auto pt-4">
                   <div className="flex flex-wrap gap-2">
@@ -233,7 +305,8 @@ function GardenPage() {
                     </ul>
                   </details>
                   <p className="mt-2 text-[11px] text-muted-foreground">
-                    Added {formatDate(plant.created_at)} · water every {plant.watering_interval_days} days
+                    Added {formatDate(plant.created_at)} · water every{" "}
+                    {plant.watering_interval_days} days
                   </p>
                 </div>
               </article>
@@ -245,13 +318,7 @@ function GardenPage() {
   );
 }
 
-function AddPlantForm({
-  profiles,
-  onDone,
-}: {
-  profiles: PlantProfile[];
-  onDone: () => void;
-}) {
+function AddPlantForm({ profiles, onDone }: { profiles: PlantProfile[]; onDone: () => void }) {
   const [nickname, setNickname] = useState("");
   const [species, setSpecies] = useState("");
   const [interval, setInterval] = useState(7);
@@ -300,7 +367,12 @@ function AddPlantForm({
         <label htmlFor="profile" className="label-base">
           Start from the library (optional)
         </label>
-        <select id="profile" value={profileId} onChange={(e) => pickProfile(e.target.value)} className="input-base">
+        <select
+          id="profile"
+          value={profileId}
+          onChange={(e) => pickProfile(e.target.value)}
+          className="input-base"
+        >
           <option value="">Custom plant</option>
           {profiles.map((p) => (
             <option key={p.id} value={p.id}>

@@ -2,12 +2,16 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, .dark, .dark *));
 
 /*
- * PlantCare AI design system — Burnt Sienna.
- * Warm, artisan, earthen: deep browns, sienna, copper and sand on cream.
- * All colors use oklch. Fonts: DM Serif Display (display) + Fira Sans (body).
+ * PlantCare AI design system — Curated Lilac, Amethyst & Teal Palette
+ * Swatches:
+ * 1. #CCABD8 (Soft Lilac / Lavender)
+ * 2. #8474A1 (Amethyst / Slate Purple)
+ * 3. #6EC6CA (Light Aqua / Turquoise)
+ * 4. #08979D (Vibrant Teal / Persian Green)
+ * 5. #055B5C (Deep Pine Teal / Forest Spruce)
  */
 
 @theme inline {
@@ -37,6 +41,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* User palette tokens */
+  --color-palette-lilac: #ccabd8;
+  --color-palette-amethyst: #8474a1;
+  --color-palette-aqua: #6ec6ca;
+  --color-palette-teal: #08979d;
+  --color-palette-pine: #055b5c;
+
+  /* Aliased theme tokens */
   --color-copper: var(--copper);
   --color-sienna-deep: var(--sienna-deep);
   --color-sandy: var(--sandy);
@@ -47,63 +60,88 @@
 }
 
 :root {
+  color-scheme: light;
   --radius: 0.75rem;
-  --background: oklch(0.972 0.014 84);
-  --foreground: oklch(0.27 0.05 42);
-  --card: oklch(0.988 0.008 84);
-  --card-foreground: oklch(0.27 0.05 42);
-  --popover: oklch(0.988 0.008 84);
-  --popover-foreground: oklch(0.27 0.05 42);
-  --primary: oklch(0.52 0.118 45);
-  --primary-foreground: oklch(0.975 0.014 84);
-  --secondary: oklch(0.9 0.045 80);
-  --secondary-foreground: oklch(0.33 0.065 42);
-  --muted: oklch(0.93 0.022 80);
-  --muted-foreground: oklch(0.47 0.045 55);
-  --accent: oklch(0.905 0.05 80);
-  --accent-foreground: oklch(0.33 0.065 42);
-  --destructive: oklch(0.55 0.19 27);
-  --destructive-foreground: oklch(0.975 0.014 84);
-  --border: oklch(0.885 0.032 78);
-  --input: oklch(0.885 0.032 78);
-  --ring: oklch(0.52 0.118 45);
-  --copper: oklch(0.63 0.115 65);
-  --sienna-deep: oklch(0.38 0.075 40);
-  --sandy: oklch(0.84 0.09 82);
-  --leaf: oklch(0.5 0.09 150);
-  --leaf-soft: oklch(0.9 0.05 148);
+
+  /* Base surfaces */
+  --background: #f7fafa;
+  --foreground: #092627;
+  --card: #ffffff;
+  --card-foreground: #055b5c;
+  --popover: #ffffff;
+  --popover-foreground: #055b5c;
+
+  /* Primary: #08979D */
+  --primary: #08979d;
+  --primary-foreground: #ffffff;
+  --primary-hover: #055b5c;
+
+  /* Secondary: Soft Aqua tint */
+  --secondary: #eaf4f5;
+  --secondary-foreground: #055b5c;
+
+  /* Muted */
+  --muted: #eef4f5;
+  --muted-foreground: #5b7476;
+
+  /* Accent */
+  --accent: #e5f3f4;
+  --accent-foreground: #055b5c;
+
+  /* Status */
+  --destructive: #d44d62;
+  --destructive-foreground: #ffffff;
+
+  /* Borders & Inputs */
+  --border: #dce7e8;
+  --input: #d2e1e2;
+  --ring: #08979d;
+
+  /* Palette Role Mappings */
+  --copper: #8474a1; /* Medium Amethyst Purple (#8474A1) */
+  --sienna-deep: #055b5c; /* Deep Pine Teal (#055B5C) */
+  --sandy: #ccabd8; /* Soft Lilac (#CCABD8) */
+  --leaf: #08979d; /* Vibrant Teal (#08979D) */
+  --leaf-soft: #e3f5f6; /* Soft Aqua tint derived from #6EC6CA */
 }
 
-.dark {
-  --background: oklch(0.21 0.03 45);
-  --foreground: oklch(0.94 0.02 84);
-  --card: oklch(0.26 0.035 45);
-  --card-foreground: oklch(0.94 0.02 84);
-  --popover: oklch(0.26 0.035 45);
-  --popover-foreground: oklch(0.94 0.02 84);
-  --primary: oklch(0.7 0.12 60);
-  --primary-foreground: oklch(0.22 0.04 45);
-  --secondary: oklch(0.31 0.04 50);
-  --secondary-foreground: oklch(0.94 0.02 84);
-  --muted: oklch(0.31 0.04 50);
-  --muted-foreground: oklch(0.72 0.04 70);
-  --accent: oklch(0.33 0.05 55);
-  --accent-foreground: oklch(0.94 0.02 84);
-  --destructive: oklch(0.65 0.18 25);
-  --destructive-foreground: oklch(0.96 0.01 84);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.63 0.115 65);
-  --copper: oklch(0.66 0.11 65);
-  --sienna-deep: oklch(0.45 0.08 42);
-  --sandy: oklch(0.6 0.08 80);
-  --leaf: oklch(0.68 0.1 150);
-  --leaf-soft: oklch(0.33 0.05 150);
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #061819;
+  --foreground: #edf8f8;
+  --card: #0a2527;
+  --card-foreground: #edf8f8;
+  --popover: #0a2527;
+  --popover-foreground: #edf8f8;
+  --primary: #6ec6ca;
+  --primary-foreground: #041b1c;
+  --primary-hover: #8ee5e8;
+  --secondary: #0d3437;
+  --secondary-foreground: #6ec6ca;
+  --muted: #0d3437;
+  --muted-foreground: #92b1b3;
+  --accent: #113e42;
+  --accent-foreground: #edf8f8;
+  --destructive: #f06a80;
+  --destructive-foreground: #ffffff;
+  --border: rgba(110, 198, 202, 0.2);
+  --input: rgba(110, 198, 202, 0.25);
+  --ring: #6ec6ca;
+  --copper: #c7a5d7;
+  --sienna-deep: #7de0e4;
+  --sandy: #c7a5d7;
+  --leaf: #6ec6ca;
+  --leaf-soft: rgba(110, 198, 202, 0.16);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
+  }
+
+  html {
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   body {
@@ -113,7 +151,9 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-family: var(--font-display);
     font-weight: 400;
     letter-spacing: -0.01em;
@@ -133,11 +173,17 @@
   padding: 0.625rem 1.375rem;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   cursor: pointer;
+  box-shadow: 0 4px 14px -3px rgba(8, 151, 157, 0.35);
 
   &:hover {
-    background: var(--sienna-deep);
+    background: var(--primary-hover, var(--sienna-deep));
+    box-shadow: 0 6px 18px -3px rgba(5, 91, 92, 0.45);
+    transform: translateY(-1px);
   }
 
   &:disabled {
@@ -152,16 +198,22 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  background: var(--copper);
-  color: var(--primary-foreground);
+  background: linear-gradient(135deg, #8474a1 0%, #08979d 100%);
+  color: #ffffff;
   padding: 0.625rem 1.375rem;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: filter 0.2s ease;
+  transition:
+    filter 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   cursor: pointer;
+  box-shadow: 0 4px 14px -3px rgba(132, 116, 161, 0.35);
 
   &:hover {
     filter: brightness(1.08);
+    box-shadow: 0 6px 18px -3px rgba(8, 151, 157, 0.45);
+    transform: translateY(-1px);
   }
 
   &:disabled {
@@ -182,11 +234,16 @@
   padding: 0.625rem 1.375rem;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
   cursor: pointer;
 
   &:hover {
     background: var(--accent);
+    border-color: var(--primary);
+    color: var(--primary);
   }
 
   &:disabled {
@@ -206,7 +263,9 @@
   padding: 0.375rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 500;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
   cursor: pointer;
 
   &:hover {
@@ -228,11 +287,14 @@
   color: var(--foreground);
   padding: 0.625rem 0.875rem;
   font-size: 0.9rem;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:focus {
-    outline: 2px solid var(--ring);
-    outline-offset: 1px;
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px rgba(8, 151, 157, 0.2);
   }
 
   &::placeholder {
@@ -261,4 +323,20 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--copper);
+}
+
+@utility bg-palette-gradient-purple {
+  background: linear-gradient(135deg, #ccabd8 0%, #8474a1 100%);
+}
+
+@utility bg-palette-gradient-teal {
+  background: linear-gradient(135deg, #6ec6ca 0%, #08979d 100%);
+}
+
+@utility bg-palette-gradient-duo {
+  background: linear-gradient(135deg, #8474a1 0%, #08979d 100%);
+}
+
+@utility bg-palette-gradient-deep {
+  background: linear-gradient(135deg, #08979d 0%, #055b5c 100%);
 }

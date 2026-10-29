@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider, useTheme } from "@/components/theme-provider";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -79,14 +80,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "PlantCare AI — Smart plant diagnosis & care" },
       {
         property: "og:description",
-        content: "AI plant diagnosis, personalized care plans and a garden tracker in one warm, earthy app.",
+        content:
+          "AI plant diagnosis, personalized care plans and a garden tracker in one warm, earthy app.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/logo.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/logo.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -103,14 +106,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var key = 'plantcare-theme';
+                  var saved = localStorage.getItem(key);
+                  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var isDark = saved === 'dark' || (saved !== 'light' && prefersDark);
+                  var root = document.documentElement;
+                  if (isDark) {
+                    root.classList.add('dark');
+                    root.setAttribute('data-theme', 'dark');
+                    root.style.colorScheme = 'dark';
+                  } else {
+                    root.classList.remove('dark');
+                    root.setAttribute('data-theme', 'light');
+                    root.style.colorScheme = 'light';
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body>
-        <div className="flex min-h-screen flex-col">
-          {children}
-        </div>
+        <div className="flex min-h-screen flex-col">{children}</div>
         <Scripts />
       </body>
     </html>
@@ -122,6 +147,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system">
+        <ThemedAppContent />
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+function ThemedAppContent() {
+  const { resolvedTheme } = useTheme();
+
+  return (
+    <>
       <SiteHeader />
       <main className="flex-1">
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -130,7 +167,7 @@ function RootComponent() {
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
         PlantCare AI — grown with care, one plant at a time.
       </footer>
-      <Toaster position="top-right" richColors />
-    </QueryClientProvider>
+      <Toaster position="top-right" richColors theme={resolvedTheme} />
+    </>
   );
 }
