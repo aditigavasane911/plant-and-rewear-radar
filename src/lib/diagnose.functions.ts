@@ -9,10 +9,9 @@ import {
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createLovableAiGatewayRunIdFetch } from "./run-id";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1";
-const MODEL_ID = "openai/gpt-6-astra";
+const AI_GATEWAY_URL = process.env["AI_GATEWAY_URL"] || process.env["OPENAI_BASE_URL"];
+const MODEL_ID = process.env["AI_MODEL_ID"] || "gpt-4o-mini";
 
 const diagnosisSchema = z.object({
   plant_name: z.string(),
@@ -63,7 +62,11 @@ export const diagnosePlant = createServerFn({ method: "POST" })
     const ctx = context as { supabase: any; userId: string; claims: any } | undefined;
     const userId = ctx?.userId || "00000000-0000-0000-0000-000000000001";
 
-    const apiKey = process.env["LOVABLE_API_KEY"];
+    const apiKey =
+      process.env["OPENAI_API_KEY"] ||
+      process.env["AI_API_KEY"] ||
+      process.env["AI_GATEWAY_API_KEY"];
+
     if (!apiKey) {
       const mockDiagnosis = {
         id: "demo-diag-" + Date.now().toString(36),
@@ -126,19 +129,14 @@ export const diagnosePlant = createServerFn({ method: "POST" })
       return { diagnosis: mockDiagnosis as any };
     }
 
-    const runIdFetch = createLovableAiGatewayRunIdFetch();
     const provider = createOpenAI({
-      baseURL: GATEWAY_URL,
+      ...(AI_GATEWAY_URL ? { baseURL: AI_GATEWAY_URL } : {}),
       apiKey,
-      headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-      fetch: runIdFetch.fetch,
     });
 
-    // @ai-sdk/openai and @ai-sdk/gateway bundle different copies of @ai-sdk/provider with
-    // identical runtime contracts, so bridge the version skew with a cast.
-    const streamTextModel = provider.responses(MODEL_ID) as unknown as Parameters<
-      typeof wrapLanguageModel
-    >[0]["model"];
+    const streamTextModel = (
+      AI_GATEWAY_URL ? provider.responses(MODEL_ID) : provider(MODEL_ID)
+    ) as unknown as Parameters<typeof wrapLanguageModel>[0]["model"];
     const result = streamText({
       model: wrapLanguageModel({
         model: streamTextModel,

@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { startDemoSession } from "@/lib/demo-session";
 
 export const Route = createFileRoute("/auth")({
@@ -105,24 +104,25 @@ function AuthPage() {
     }
   };
 
-  const signInWithProvider = async (provider: "google" | "lovable") => {
+  const signInWithProvider = async (provider: "google") => {
     sessionStorage.setItem(REDIRECT_KEY, target);
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
-      if (result.error) {
-        // Fall back to demo provider session for local development
+      if (error) {
+        // Fall back to demo session when running locally without OAuth configured
         startDemoSession(`${provider}.user@plantcare.ai`);
-        toast.info(`Signed in via ${provider === "google" ? "Google" : "Lovable"} (Demo) 🌿`);
+        toast.info(`Signed in via Google (Demo) 🌿`);
         afterSession();
         return;
       }
-      if (result.redirected) return;
-      afterSession();
     } catch {
       startDemoSession(`${provider}.user@plantcare.ai`);
-      toast.info(`Signed in via ${provider === "google" ? "Google" : "Lovable"} (Demo) 🌿`);
+      toast.info(`Signed in via Google (Demo) 🌿`);
       afterSession();
     }
   };
@@ -245,13 +245,6 @@ function AuthPage() {
             className="btn-outline w-full"
           >
             <span aria-hidden>🇬</span> Continue with Google
-          </button>
-          <button
-            type="button"
-            onClick={() => signInWithProvider("lovable")}
-            className="btn-outline w-full"
-          >
-            <span aria-hidden>💚</span> Continue with Lovable
           </button>
         </div>
       </div>

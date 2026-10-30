@@ -1,24 +1,58 @@
-# Plant and ReWear Radar
+# PlantCare AI & ReWear Radar
 
-hey , i want to build a application realted to the PlantCare AI and ReWear Radar, create a web for it
+A full-stack, standalone web application combining intelligent plant diagnostics, botanical care tracking, and smart garment care intelligence. Built with TanStack Start, React 19, Vite 6, Tailwind CSS, and Supabase.
 
-This project was built with [Lovable](https://lovable.dev).
+## ✨ Features
 
-## Build with Lovable
+- **AI Plant Pathology**: Snap or upload any plant photo to analyze disease patterns, nutritional deficiencies, and receive actionable organic treatments with confidence scoring.
+- **My Garden Tracker**: Monitor individual plants, watering rhythms, fertilizing schedules, and historical health logs.
+- **Botanical Library**: Deep dive into light requirements, propagation methods, toxicity levels, and humidity needs for house and garden plants.
+- **Gesture-driven & Camera Engine**: Real-time webcam leaf inspection with motion controls and visual feedback.
+- **Data Science Explorer**: Dataset inspection, model performance metrics, and pathology distribution visualizer.
+- **Full Offline & Demo Mode**: Test and run all features locally without needing active cloud credentials.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/9cdcf017-4553-4921-9ac0-7e63e36550db).
+## 🚀 Getting Started
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+### Prerequisites
 
-## Development
+- [Node.js](https://nodejs.org/) (v20+ recommended)
+- [npm](https://www.npmjs.com/)
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+### Installation & Local Run
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+```bash
+# Clone the repository
+git clone <repository-url>
+cd plant-and-rewear-radar
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
+
+The application will be running at [http://localhost:3000](http://localhost:3000).
+
+### Environment Configuration (Optional)
+
+Create a `.env` file in the project root to configure your database or AI models:
+
+```env
+# Supabase (Optional — Demo mode runs automatically without these)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# AI Provider (Optional — Demo diagnosis generator runs locally)
+OPENAI_API_KEY=your-openai-api-key
+AI_MODEL_ID=gpt-4o-mini
+```
+
+## 🛠 Tech Stack
+
+- **Framework**: TanStack Start (React 19)
+- **Styling**: Tailwind CSS v4, Lucide Icons
+- **State & Data**: TanStack Query v5, Zustand, Zod
+- **Backend / Database**: Supabase JS, Drizzle ORM

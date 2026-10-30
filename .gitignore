@@ -33,3 +33,5 @@ dist-ssr
 
 # Raw offline training dataset (35k+ files, use public/dataset-samples/ for web app)
 Dataset/
+.env
+.env.local

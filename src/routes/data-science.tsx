@@ -43,7 +43,7 @@ export const Route = createFileRoute("/data-science")({
   component: DataSciencePage,
 });
 
-export function DataSciencePage() {
+function DataSciencePage() {
   // State for interactive simulation
   const [selectedSlug, setSelectedSlug] = useState<string>("monstera");
   const [ambientTemp, setAmbientTemp] = useState<number>(23);
