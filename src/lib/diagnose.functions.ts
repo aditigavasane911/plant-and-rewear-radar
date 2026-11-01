@@ -69,7 +69,7 @@ export const diagnosePlant = createServerFn({ method: "POST" })
 
     if (!apiKey) {
       const mockDiagnosis = {
-        id: "demo-diag-" + Date.now().toString(36),
+        id: crypto.randomUUID(),
         user_id: userId,
         plant_id: plantId,
         image_url: data.imageDataUrl,
@@ -114,7 +114,7 @@ export const diagnosePlant = createServerFn({ method: "POST" })
       };
 
       try {
-        if (ctx?.supabase && userId !== "00000000-0000-0000-0000-000000000001") {
+        if (ctx?.supabase && userId) {
           const { data: row } = await ctx.supabase
             .from("diagnoses")
             .insert(mockDiagnosis)
@@ -123,7 +123,7 @@ export const diagnosePlant = createServerFn({ method: "POST" })
           if (row) return { diagnosis: row };
         }
       } catch {
-        // Ignore RLS errors in demo mode
+        // Fallback if insertion fails
       }
 
       return { diagnosis: mockDiagnosis as any };

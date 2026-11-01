@@ -5,6 +5,8 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "./theme-toggle";
 
+import { isDemoSessionActive, getStoredDemoEmail, endDemoSession } from "@/lib/demo-session";
+
 const navItems = [
   { to: "/", label: "Home" },
   { to: "/diagnose", label: "Diagnose" },
@@ -21,25 +23,48 @@ export function SiteHeader() {
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getUser().then(({ data }) => {
-      if (active) setUser(data.user ?? null);
-    });
+
+    const syncUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+      if (data?.user) {
+        setUser(data.user);
+      } else if (isDemoSessionActive()) {
+        setUser({ email: getStoredDemoEmail() } as User);
+      } else {
+        setUser(null);
+      }
+    };
+
+    syncUser();
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      setUser(session?.user ?? null);
+      setUser(
+        session?.user ?? (isDemoSessionActive() ? ({ email: getStoredDemoEmail() } as User) : null),
+      );
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
+
+    const handleCustomAuth = () => {
+      if (active) syncUser();
+    };
+    window.addEventListener("plantcare:auth-change", handleCustomAuth);
+
     return () => {
       active = false;
       sub.subscription.unsubscribe();
+      window.removeEventListener("plantcare:auth-change", handleCustomAuth);
     };
   }, [router, queryClient]);
 
   const handleSignOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
+    endDemoSession();
     await supabase.auth.signOut();
+    setUser(null);
     router.navigate({ to: "/auth", search: { redirect: undefined }, replace: true });
   };
 
@@ -86,11 +111,8 @@ export function SiteHeader() {
           <ThemeToggle />
           {user ? (
             <>
-              <span className="hidden max-w-44 truncate text-sm text-muted-foreground sm:block">
+              <span className="hidden max-w-44 truncate text-sm font-medium text-foreground sm:block">
                 {user.email}
-              </span>
-              <span className="rounded-full bg-leaf-soft px-2 py-0.5 text-[11px] font-semibold text-leaf">
-                Demo
               </span>
               <button
                 type="button"

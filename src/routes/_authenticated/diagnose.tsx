@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { fileToResizedDataUrl, formatDate, healthStyles, severityStyles } from "@/lib/plants";
 import { diagnosesQuery, gardenPlantsQuery, type Diagnosis } from "@/lib/plant-queries";
+import { supabase } from "@/integrations/supabase/client";
 import { getBotanicalProfile } from "@/lib/botanical-data";
 import {
   cameraGestureEngine,
@@ -16,6 +17,11 @@ import {
   type PlantDiseaseClass,
   type PredictionResult,
 } from "@/lib/dataset-model";
+import {
+  isDemoSessionActive,
+  saveDemoDiagnosis,
+  addDemoGardenPlant,
+} from "@/lib/demo-session";
 
 export const Route = createFileRoute("/_authenticated/diagnose")({
   loader: ({ context }) =>
@@ -300,8 +306,6 @@ function DiagnosePage() {
       const topClass = exactSample || predictions[0]?.classInfo || fallbackClass;
       const confidence = exactSample ? 98 : predictions[0]?.confidence || 94;
 
-      const { addDemoDiagnosis } = await import("@/lib/demo-session");
-
       const issues: DiagnosisIssue[] = [];
       if (!topClass.isHealthy) {
         issues.push({
@@ -332,8 +336,13 @@ function DiagnosePage() {
           : `Targeted control: ${topClass.chemicalTreatment}`,
       ];
 
-      const demoResult = addDemoDiagnosis({
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const newDiagnosis = {
         plant_id: plantId || null,
+        user_id: user?.id || "",
         image_url: imgUrl,
         plant_name: `${topClass.crop} (${topClass.disease})`,
         scientific_name: topClass.pathogenName,
@@ -342,13 +351,41 @@ function DiagnosePage() {
         summary: topClass.isHealthy
           ? `Verified by the PlantVillage 23-Class Computer Vision model (${DATASET_SUMMARY.totalImages.toLocaleString()} training images). Specimen shows healthy planar leaf architecture, intact glandular cuticular barrier, and optimal chlorophyll saturation.`
           : `Detected by PlantVillage 23-Class Neural Vision model with ${confidence}% confidence. Identified as ${topClass.name} (${topClass.pathogenType} etiology: ${topClass.pathogenName}). Leaf symptom gesture indicates ${topClass.leafGestureSymptom}`,
-        issues,
+        issues: issues as any,
         watering_interval_days: topClass.crop === "Tomato" ? 4 : topClass.crop === "Corn" ? 3 : 7,
-        care_tips: careTips,
-      });
+        care_tips: careTips as any,
+      };
 
-      setResult(demoResult as any);
-      await refetch();
+      if (isDemoSessionActive()) {
+        const saved = saveDemoDiagnosis(newDiagnosis);
+        setResult(saved as any);
+        await refetch();
+      } else if (user?.id) {
+        const { data: inserted, error: insertError } = await supabase
+          .from("diagnoses")
+          .insert(newDiagnosis)
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Failed to persist diagnosis:", insertError);
+          setResult({
+            ...newDiagnosis,
+            id: crypto.randomUUID(),
+            created_at: new Date().toISOString(),
+          } as any);
+        } else {
+          setResult(inserted as any);
+          await refetch();
+        }
+      } else {
+        setResult({
+          ...newDiagnosis,
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+        } as any);
+      }
+
       toast.success(`Diagnosis complete: ${topClass.name} 🌿`);
     } catch (e) {
       console.error(e);
@@ -946,6 +983,15 @@ async function supabaseInsert(input: {
   imageUrl: string;
 }): Promise<{ error: string | null }> {
   try {
+    if (isDemoSessionActive()) {
+      addDemoGardenPlant({
+        nickname: input.nickname,
+        species: input.species,
+        watering_interval_days: input.wateringIntervalDays,
+        image_url: input.imageUrl,
+      });
+      return { error: null };
+    }
     const { supabase } = await import("@/integrations/supabase/client");
     const {
       data: { user },

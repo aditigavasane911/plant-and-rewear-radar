@@ -11,6 +11,13 @@ import {
 } from "@/lib/plant-queries";
 import { formatDate, formatDateTime, wateringStateStyles, wateringStatus } from "@/lib/plants";
 import { getBotanicalProfile } from "@/lib/botanical-data";
+import {
+  isDemoSessionActive,
+  waterDemoPlant,
+  fertilizeDemoPlant,
+  deleteDemoPlant,
+  addDemoGardenPlant,
+} from "@/lib/demo-session";
 
 export const Route = createFileRoute("/_authenticated/garden")({
   loader: ({ context }) =>
@@ -50,6 +57,10 @@ function GardenPage() {
 
   const waterMutation = useMutation({
     mutationFn: async (plant: GardenPlantWithEvents) => {
+      if (isDemoSessionActive()) {
+        waterDemoPlant(plant.id);
+        return;
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -74,6 +85,10 @@ function GardenPage() {
 
   const fertilizeMutation = useMutation({
     mutationFn: async (plant: GardenPlantWithEvents) => {
+      if (isDemoSessionActive()) {
+        fertilizeDemoPlant(plant.id);
+        return;
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -98,6 +113,10 @@ function GardenPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (plant: GardenPlantWithEvents) => {
+      if (isDemoSessionActive()) {
+        deleteDemoPlant(plant.id);
+        return;
+      }
       const { error } = await supabase.from("garden_plants").delete().eq("id", plant.id);
       if (error) throw new Error(error.message);
     },
@@ -339,6 +358,17 @@ function AddPlantForm({ profiles, onDone }: { profiles: PlantProfile[]; onDone: 
     event.preventDefault();
     setBusy(true);
     try {
+      if (isDemoSessionActive()) {
+        addDemoGardenPlant({
+          profile_id: profileId || null,
+          nickname: nickname.trim(),
+          species: species.trim() || nickname.trim(),
+          watering_interval_days: Math.max(1, interval || 7),
+        });
+        toast.success(`${nickname.trim()} joined your garden 🌿`);
+        onDone();
+        return;
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();

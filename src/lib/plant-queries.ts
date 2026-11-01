@@ -1,12 +1,19 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { COMPLETE_PLANT_DATABASE, getBotanicalProfile } from "@/lib/botanical-data";
+import { COMPLETE_PLANT_DATABASE } from "@/lib/botanical-data";
+import {
+  isDemoSessionActive,
+  getDemoGardenPlants,
+  getDemoDiagnoses,
+  getDemoUser,
+} from "@/lib/demo-session";
 
 export type PlantProfile = Database["public"]["Tables"]["plant_profiles"]["Row"];
 export type GardenPlant = Database["public"]["Tables"]["garden_plants"]["Row"];
 export type CareEvent = Database["public"]["Tables"]["care_events"]["Row"];
 export type Diagnosis = Database["public"]["Tables"]["diagnoses"]["Row"];
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type GardenPlantWithEvents = GardenPlant & { care_events: CareEvent[] | null };
 
 export const plantProfilesQuery = () =>
@@ -50,10 +57,15 @@ export const gardenPlantsQuery = () =>
   queryOptions({
     queryKey: ["garden-plants"],
     queryFn: async (): Promise<GardenPlantWithEvents[]> => {
+      if (isDemoSessionActive()) {
+        return getDemoGardenPlants() as unknown as GardenPlantWithEvents[];
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not signed in");
+      if (!user) {
+        return [];
+      }
       const { data, error } = await supabase
         .from("garden_plants")
         .select("*, care_events(*)")
@@ -68,10 +80,13 @@ export const diagnosesQuery = () =>
   queryOptions({
     queryKey: ["diagnoses"],
     queryFn: async (): Promise<Diagnosis[]> => {
+      if (isDemoSessionActive()) {
+        return getDemoDiagnoses() as unknown as Diagnosis[];
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not signed in");
+      if (!user) return [];
       const { data, error } = await supabase
         .from("diagnoses")
         .select("*")
@@ -79,6 +94,51 @@ export const diagnosesQuery = () =>
         .order("created_at", { ascending: false })
         .limit(12);
       if (error) throw new Error(error.message);
-      return data ?? [];
+      return (data ?? []) as unknown as Diagnosis[];
+    },
+  });
+
+export const userProfileQuery = () =>
+  queryOptions({
+    queryKey: ["user-profile"],
+    queryFn: async (): Promise<Profile | null> => {
+      if (isDemoSessionActive()) {
+        const demoUser = getDemoUser();
+        return {
+          id: demoUser.id,
+          email: demoUser.email,
+          full_name: demoUser.user_metadata.full_name,
+          avatar_url: null,
+          provider: "demo",
+          created_at: demoUser.created_at,
+          updated_at: demoUser.updated_at,
+        };
+      }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (error) {
+        // Return fallback profile constructed from auth metadata
+        return {
+          id: user.id,
+          email: user.email ?? null,
+          full_name:
+            user.user_metadata?.["full_name"] ||
+            user.user_metadata?.["name"] ||
+            user.email?.split("@")[0] ||
+            "Gardener",
+          avatar_url: user.user_metadata?.["avatar_url"] || null,
+          provider: user.app_metadata?.["provider"] || "email",
+          created_at: user.created_at,
+          updated_at: user.updated_at ?? user.created_at,
+        };
+      }
+      return data;
     },
   });

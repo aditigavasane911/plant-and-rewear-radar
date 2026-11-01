@@ -403,3 +403,6 @@ export function addDemoDiagnosis(input: Partial<DemoDiagnosis>): DemoDiagnosis {
   }
   return item;
 }
+
+export const saveDemoDiagnosis = addDemoDiagnosis;
+
